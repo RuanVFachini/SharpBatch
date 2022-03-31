@@ -4,10 +4,9 @@ namespace SharpBatch.Core.Options
 {
     public class BackgroundOptions
     {
-        public const string Section = "Background";
+        public const string Section = "SharpBatch:BackgroundService";
 
         public int Workers { get; set; }
         public int ServerWorkerRefresh { get; set; }
-        public IList<QueueOptions> Queues { get; set; }
     }
 }

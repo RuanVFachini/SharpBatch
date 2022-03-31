@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using SharpBatch.Core.Interfaces;
 using SharpBatch.Core.Options;
 using System;
 using System.Collections.Generic;
@@ -14,19 +15,16 @@ namespace SharpBatch.Core.Services
         private readonly ILogger<QueuedHostedService> _logger;
         private readonly BackgroundOptions _options;
         private readonly IWorkerService _workerService;
-        private readonly IQueueService _backgroundTaskQueueService;
-        private List<Thread> ThreadList = new List<Thread>();
+        private readonly List<Thread> ThreadList = new List<Thread>();
 
         public QueuedHostedService(
             ILogger<QueuedHostedService> logger,
             IOptions<BackgroundOptions> options,
-            IWorkerService workerService,
-            IQueueService backgroundTaskQueueService)
+            IWorkerService workerService)
         {
             _logger = logger;
             _options = options.Value;
             _workerService = workerService;
-            _backgroundTaskQueueService = backgroundTaskQueueService;
         }
 
 

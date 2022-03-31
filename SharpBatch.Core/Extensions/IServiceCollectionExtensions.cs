@@ -1,10 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SharpBatch.Core.Interfaces;
 using SharpBatch.Core.Options;
 using SharpBatch.Core.Services;
 using SharpBatch.Core.Workers;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SharpBatch.Core.Extensions
 {
@@ -19,10 +18,11 @@ namespace SharpBatch.Core.Extensions
 
             services.Configure<BackgroundOptions>(x =>
             {
-                x.Queues = backgroundOption.Queues;
                 x.ServerWorkerRefresh = backgroundOption.ServerWorkerRefresh;
                 x.Workers = backgroundOption.Workers;
             });
+
+            services.AddSingleton<IQueueBefferService, QueueBefferService>();
 
             services.AddSingleton<IQueueService, T>();
 

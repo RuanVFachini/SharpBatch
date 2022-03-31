@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using SharpBatch.Core.Interfaces;
 using SharpBatch.Core.Services;
 using System;
 using System.Threading;
@@ -7,14 +8,14 @@ namespace SharpBatch.Core.Workers
 {
     public class WorkerService : IWorkerService
     {
-        private readonly IQueueService _taskQueueService;
+        private readonly IQueueBefferService _queueBefferService;
         private readonly ILogger<IWorkerService> _logger;
 
         public WorkerService(
-            IQueueService service,
+            IQueueBefferService service,
             ILogger<IWorkerService> logger)
         {
-            _taskQueueService = service;
+            _queueBefferService = service;
             _logger = logger;
         }
         public Thread CreateWorker(CancellationToken stoppingToken)
@@ -26,11 +27,11 @@ namespace SharpBatch.Core.Workers
                     {
                         try
                         {
-                            var workItem = _taskQueueService.DequeueAsync(stoppingToken).GetAwaiter().GetResult();
+                            var workItem = _queueBefferService.DequeueAsync("default", stoppingToken).GetAwaiter().GetResult();
 
                             try
                             {
-                                workItem(stoppingToken).AsTask().Wait();
+                                workItem(stoppingToken).Wait();
                             }
                             catch (Exception ex)
                             {

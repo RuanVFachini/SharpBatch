@@ -1,6 +1,6 @@
 using System.Threading;
 
-namespace SharpBatch.Core.Services
+namespace SharpBatch.Core.Interfaces
 {
     public interface IWorkerService
     {
