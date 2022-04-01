@@ -3,12 +3,14 @@ using RabbitMQ.Client;
 using SharpBatch.Core.Options;
 using SharpBatch.RebbitMQ.Core.Interfaces;
 using SharpBatch.RebbitMQ.Core.Options;
+using System;
 using System.Collections.Generic;
 
 namespace SharpBatch.RebbitMQ.Core.Services
 {
     public class ChannelService : IChannelService
     {
+        private IConnection _conn;
         public RabbitMQOptions ServerOptions { get; }
         public IEnumerable<QueueOptions> Queues { get => ServerOptions.Queues; }
 
@@ -28,8 +30,14 @@ namespace SharpBatch.RebbitMQ.Core.Services
                 DispatchConsumersAsync = true
             };
 
-            IConnection conn = factory.CreateConnection();
-            return conn.CreateModel();
+            _conn = factory.CreateConnection();
+            return _conn.CreateModel();
+        }
+
+        public void Dispose()
+        {
+            _conn.Close();
+            _conn.Dispose();
         }
     }
 }

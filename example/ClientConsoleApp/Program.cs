@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
+using SharpBatch.RebbitMQ.Client.Extensions;
 using System;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace ClientConsoleApp
             using var host = Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
-                //services.ConfigureSharpBatchRabbitMQClient();
+                services.ConfigureSharpBatchRabbitMQClient();
             })
             .Build();
 

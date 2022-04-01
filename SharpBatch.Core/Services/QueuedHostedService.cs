@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SharpBatch.Core.Services
 {
-    public class QueuedHostedService : BackgroundService
+    public class QueuedHostedService : BackgroundService, IDisposable
     {
         private readonly ILogger<QueuedHostedService> _logger;
         private readonly BackgroundOptions _options;
@@ -79,6 +79,13 @@ namespace SharpBatch.Core.Services
             _logger.LogInformation("Queued Hosted Service is stopping.");
 
             await base.StopAsync(stoppingToken);
+        }
+
+        public override void Dispose()
+        {
+            _workerService.Dispose();
+            ThreadList.Clear();
+            base.Dispose();
         }
     }
 }

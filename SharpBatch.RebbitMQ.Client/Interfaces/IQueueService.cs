@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpBatch.RebbitMQ.Client.Interfaces
 {
-    public interface IClientService
+    public interface IQueueService : IDisposable
     {
     }
 }

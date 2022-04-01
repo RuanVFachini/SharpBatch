@@ -34,5 +34,10 @@ namespace SharpBatch.Core.Services
         {
             return await _executionQueue[queueName].Reader.ReadAsync();
         }
+
+        public void Dispose()
+        {
+            _executionQueue.Clear();
+        }
     }
 }

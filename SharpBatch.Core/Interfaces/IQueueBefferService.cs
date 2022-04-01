@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace SharpBatch.Core.Interfaces
 {
-    public interface IQueueBefferService
+    public interface IQueueBefferService : IDisposable
     {
         Task<Task> QueueAsync(string queueName, Action<CancellationToken> action);
 

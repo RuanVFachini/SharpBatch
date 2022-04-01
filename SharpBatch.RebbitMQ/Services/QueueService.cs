@@ -2,6 +2,7 @@ using SharpBatch.Core.Interfaces;
 using SharpBatch.Core.Options;
 using SharpBatch.RebbitMQ.Consumer.Interfaces;
 using SharpBatch.RebbitMQ.Core.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace SharpBatch.RebbitMQ.Consumer
@@ -22,6 +23,12 @@ namespace SharpBatch.RebbitMQ.Consumer
 
             _connectionService.RegisterConsummers();
             
+        }
+
+        public void Dispose()
+        {
+            _channelService.Dispose();
+            _connectionService.Dispose();
         }
     }
 }

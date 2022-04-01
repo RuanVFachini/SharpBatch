@@ -1,13 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.Extensions.DependencyInjection;
+using SharpBatch.RebbitMQ.Client.Interfaces;
+using SharpBatch.RebbitMQ.Core.Extensions;
 
 namespace SharpBatch.RebbitMQ.Client.Extensions
 {
-    public static IServiceCollection ConfigureSharpBatchRabbitMQClient(this IServiceCollection services)
+    public static class IServiceCollectionExtensions
     {
-        services.ConfigureSharpBatchRabbitCore();
+        public static IServiceCollection ConfigureSharpBatchRabbitMQClient(this IServiceCollection services)
+        {
+            services.AddSingleton<IQueueService, QueueService>();
+            services.ConfigureSharpBatchRabbitCore();
 
-        return services.ConfigureSharpBatch<QueueService>();
+            return services;
+        }
     }
+    
 }

@@ -8,9 +8,11 @@ namespace SharpBatch.RebbitMQ.Consumer.Extensions
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureSharpBatchRabbitMQConsumer(this IServiceCollection services)
+        public static IServiceCollection ConfigureSharpBatchRabbitMQConsumer<T>(this IServiceCollection services)
+            where T : class, IProcessorManager
         {
             services.AddScoped<IConsumerService, ConsumerService>();
+            services.AddScoped<IProcessorManager, T>();
 
             services.ConfigureSharpBatchRabbitCore();
 

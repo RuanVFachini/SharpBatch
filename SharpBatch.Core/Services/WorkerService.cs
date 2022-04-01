@@ -49,5 +49,10 @@ namespace SharpBatch.Core.Workers
                     IsBackground = true
                 };
         }
+
+        public void Dispose()
+        {
+            _queueBefferService.Dispose();
+        }
     }
 }

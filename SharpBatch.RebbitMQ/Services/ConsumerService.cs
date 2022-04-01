@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using SharpBatch.Core.Exceptions;
 using SharpBatch.Core.Interfaces;
@@ -12,35 +13,42 @@ namespace SharpBatch.RebbitMQ.Consumer.Services
     {
         private readonly IQueueBefferService _queueBefferService;
         private readonly IChannelService _channelService;
+        private readonly IServiceProvider _serviceProvider;
+        private IModel _channel;
 
         public ConsumerService(
             IQueueBefferService queueBefferService,
-            IChannelService channelService)
+            IChannelService channelService,
+            IServiceProvider serviceProvider)
         {
             _queueBefferService = queueBefferService;
             _channelService = channelService;
+            _serviceProvider = serviceProvider;
         }
 
         public virtual void RegisterConsummers()
         {
-            var channel = _channelService.GenerateChannel();
+            _channel = _channelService.GenerateChannel();
 
             foreach (var queue in _channelService.Queues)
             {
-                var consumer = GenerateGenericAsyncConsumer(channel, queue.Name);
-                channel.BasicConsume(queue.Name, true, consumer);
+                var consumer = GenerateGenericAsyncConsumer(queue.Name);
+                _channel.BasicConsume(queue.Name, true, consumer);
             }
         }
 
-        protected virtual AsyncEventingBasicConsumer GenerateGenericAsyncConsumer(IModel channel, string name)
+        protected virtual AsyncEventingBasicConsumer GenerateGenericAsyncConsumer(string name)
         {
-            var consumer = new AsyncEventingBasicConsumer(channel);
+            var consumer = new AsyncEventingBasicConsumer(_channel);
             consumer.Received += async (ch, message) =>
             {
                 try
                 {
                     var taskawait = await _queueBefferService.QueueAsync(name, x =>
                     {
+                        var scope = _serviceProvider.CreateScope();
+
+                        scope.ServiceProvider.GetRequiredService<IProcessorManager>().Execute(message);
 
                     });
 
@@ -70,6 +78,14 @@ namespace SharpBatch.RebbitMQ.Consumer.Services
                 throw new QueueConsumeException(e);
 
             throw new QueueConsumeException("Unexpected background consumer error");
+        }
+
+        public void Dispose()
+        {
+            _channel.Close();
+            _channel.Dispose();
+            _queueBefferService.Dispose();
+            _channelService.Dispose();
         }
     }
 }
