@@ -11,12 +11,14 @@ namespace SharpBatch.RebbitMQ.Consumer.Extensions
         public static IServiceCollection ConfigureSharpBatchRabbitMQConsumer<T>(this IServiceCollection services)
             where T : class, IProcessorManager
         {
-            services.AddScoped<IConsumerService, ConsumerService>();
             services.AddScoped<IProcessorManager, T>();
-
             services.ConfigureSharpBatchRabbitCore();
 
-            return services.ConfigureSharpBatch<QueueService>();
+            services.AddHostedService<ConsumerHostedService>();
+
+            return services;
+
+            
         }
     }
 }

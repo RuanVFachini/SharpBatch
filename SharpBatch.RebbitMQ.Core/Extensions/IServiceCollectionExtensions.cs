@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SharpBatch.Core.Extensions;
 using SharpBatch.RebbitMQ.Core.Interfaces;
 using SharpBatch.RebbitMQ.Core.Options;
 using SharpBatch.RebbitMQ.Core.Services;
@@ -10,6 +11,8 @@ namespace SharpBatch.RebbitMQ.Core.Extensions
     {
         public static IServiceCollection ConfigureSharpBatchRabbitCore(this IServiceCollection services)
         {
+            services.ConfigureSharpBatch();
+
             var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
             var rabbitMQOptions = config.GetSection(RabbitMQOptions.Section).Get<RabbitMQOptions>();
 

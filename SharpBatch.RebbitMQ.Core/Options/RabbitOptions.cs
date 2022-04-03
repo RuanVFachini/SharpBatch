@@ -11,7 +11,6 @@ namespace SharpBatch.RebbitMQ.Core.Options
         public string Password {get;set;}
         public string VirtualHost {get;set;}
         public string HostName { get; set; }
-        public IList<QueueOptions> Queues { get; set; }
 
     }
 }

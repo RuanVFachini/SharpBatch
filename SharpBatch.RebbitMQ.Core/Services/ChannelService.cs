@@ -12,8 +12,6 @@ namespace SharpBatch.RebbitMQ.Core.Services
     {
         private IConnection _conn;
         public RabbitMQOptions ServerOptions { get; }
-        public IEnumerable<QueueOptions> Queues { get => ServerOptions.Queues; }
-
         public ChannelService(IOptions<RabbitMQOptions> options)
         {
             ServerOptions = options.Value;

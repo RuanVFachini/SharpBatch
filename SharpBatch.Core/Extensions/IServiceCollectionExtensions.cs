@@ -9,9 +9,8 @@ namespace SharpBatch.Core.Extensions
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection ConfigureSharpBatch<T>(
+        public static IServiceCollection ConfigureSharpBatch(
              this IServiceCollection services)
-            where T : class, IQueueService
         {
             var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
             var backgroundOption = config.GetSection(BackgroundOptions.Section).Get<BackgroundOptions>();
@@ -22,10 +21,14 @@ namespace SharpBatch.Core.Extensions
                 x.Workers = backgroundOption.Workers;
             });
 
+            var queueOption = config.GetSection(QueueOptions.Section).Get<QueueOptions>();
+
+            services.Configure<QueueOptions>(x =>
+            {
+                x.Queues = queueOption.Queues;
+            });
+
             services.AddSingleton<IQueueBefferService, QueueBefferService>();
-
-            services.AddSingleton<IQueueService, T>();
-
             services.AddSingleton<IWorkerService, WorkerService>();
 
             services.AddHostedService<QueuedHostedService>();

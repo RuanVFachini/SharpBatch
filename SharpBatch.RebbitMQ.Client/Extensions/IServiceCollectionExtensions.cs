@@ -8,7 +8,7 @@ namespace SharpBatch.RebbitMQ.Client.Extensions
     {
         public static IServiceCollection ConfigureSharpBatchRabbitMQClient(this IServiceCollection services)
         {
-            services.AddSingleton<IQueueService, QueueService>();
+            services.AddSingleton<IClientQueueService, ClientQueueService>();
             services.ConfigureSharpBatchRabbitCore();
 
             return services;

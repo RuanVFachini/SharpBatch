@@ -10,6 +10,5 @@ namespace SharpBatch.RebbitMQ.Core.Interfaces
     {
         IModel GenerateChannel();
         RabbitMQOptions ServerOptions { get; }
-        IEnumerable<QueueOptions> Queues { get; }
     }
 }

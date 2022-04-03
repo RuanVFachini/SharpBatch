@@ -3,6 +3,7 @@ using SharpBatch.Core.Interfaces;
 using SharpBatch.Core.Services;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SharpBatch.Core.Workers
 {
@@ -18,32 +19,36 @@ namespace SharpBatch.Core.Workers
             _queueBefferService = service;
             _logger = logger;
         }
-        public Thread CreateWorker(CancellationToken stoppingToken)
+        public Thread CreateWorker(CancellationToken stoppingToken, string queueName)
         {
             return 
                 new Thread(() =>
                 {
-                    while(!stoppingToken.IsCancellationRequested)
+                    Task.Run(async () =>
                     {
-                        try
+                        while (!stoppingToken.IsCancellationRequested)
                         {
-                            var workItem = _queueBefferService.DequeueAsync("default", stoppingToken).GetAwaiter().GetResult();
-
                             try
                             {
-                                workItem(stoppingToken).Wait();
+                                var workItem = await _queueBefferService.DequeueAsync(queueName);
+
+                                try
+                                {
+                                    workItem.Start();
+                                    workItem.Wait(stoppingToken);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex,
+                                        "Error occurred executing Background Server.");
+                                }
                             }
-                            catch (Exception ex)
+                            catch (Exception e)
                             {
-                                _logger.LogError(ex,
-                                    "Error occurred executing Background Server.");
+                                throw e;
                             }
                         }
-                        catch (Exception e)
-                        {
-                            throw e;
-                        }
-                    }
+                    }).Wait();
                 })
                 {
                     IsBackground = true
