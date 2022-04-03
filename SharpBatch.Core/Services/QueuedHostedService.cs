@@ -15,30 +15,22 @@ namespace SharpBatch.Core.Services
     {
         private readonly ILogger<QueuedHostedService> _logger;
         private readonly BackgroundOptions _backgroundOptions;
-        private readonly QueueOptions _queueOptions;
         private readonly IWorkerService _workerService;
-        private readonly Dictionary<string, Thread> ThreadQueueDictionary = new Dictionary<string, Thread>();
+        private readonly List<Thread> ThreadList = new List<Thread>();
 
         public QueuedHostedService(
             ILogger<QueuedHostedService> logger,
             IOptions<BackgroundOptions> options,
-            IOptions<QueueOptions> queueOptions,
             IWorkerService workerService)
         {
             _logger = logger;
             _backgroundOptions = options.Value;
-            _queueOptions = queueOptions.Value;
             _workerService = workerService;
         }
 
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation(
-                $"Queued Hosted Service is running.{Environment.NewLine}" +
-                $"{Environment.NewLine}Tap W to add a work item to the " +
-                $"background queue.{Environment.NewLine}");
-
             await ExecuteInternalsAsync(stoppingToken);
         }
 
@@ -52,11 +44,9 @@ namespace SharpBatch.Core.Services
                     {
                         while (HasFreeWorker())
                         {
-                            var queue = _queueOptions.Queues.FirstOrDefault(x => !ThreadQueueDictionary.ContainsKey(x.Name));
+                            var thread = _workerService.CreateWorker(stoppingToken);
 
-                            var thread = _workerService.CreateWorker(stoppingToken, queue.Name);
-
-                            ThreadQueueDictionary.Add(queue.Name, thread) ;
+                            ThreadList.Add(thread) ;
 
                             thread.Start();
                         }
@@ -75,14 +65,9 @@ namespace SharpBatch.Core.Services
 
         private bool HasFreeWorker()
         {
-            var toRemove = ThreadQueueDictionary.Where(x => !x.Value.IsAlive).Select(x => x.Key);
+            ThreadList.RemoveAll(x => !x.IsAlive);
 
-            foreach (var key in toRemove)
-            {
-                ThreadQueueDictionary.Remove(key);
-            }
-
-            return _backgroundOptions.Workers - ThreadQueueDictionary.Count > 0;
+            return _backgroundOptions.Workers - ThreadList.Count > 0;
         }
 
         public override async Task StopAsync(CancellationToken stoppingToken)
@@ -95,7 +80,8 @@ namespace SharpBatch.Core.Services
         public override void Dispose()
         {
             _workerService.Dispose();
-            ThreadQueueDictionary.Clear();
+            ThreadList.ForEach(x => x.Abort());
+            ThreadList.Clear();
             base.Dispose();
         }
     }

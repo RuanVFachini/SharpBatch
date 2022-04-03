@@ -19,7 +19,7 @@ namespace SharpBatch.Core.Workers
             _queueBefferService = service;
             _logger = logger;
         }
-        public Thread CreateWorker(CancellationToken stoppingToken, string queueName)
+        public Thread CreateWorker(CancellationToken stoppingToken)
         {
             return 
                 new Thread(() =>
@@ -30,12 +30,14 @@ namespace SharpBatch.Core.Workers
                         {
                             try
                             {
-                                var workItem = await _queueBefferService.DequeueAsync(queueName);
+                                var workItem = await _queueBefferService.DequeueAsync();
 
                                 try
                                 {
-                                    workItem.Start();
-                                    workItem.Wait(stoppingToken);
+                                    workItem.Value.Start();
+                                    workItem.Value.Wait(stoppingToken);
+
+                                    _queueBefferService.Free(workItem.Key);
                                 }
                                 catch (Exception ex)
                                 {

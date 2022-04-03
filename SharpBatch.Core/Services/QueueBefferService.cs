@@ -15,14 +15,13 @@ namespace SharpBatch.Core.Services
     {
         private readonly ConcurrentDictionary<string, Channel<Task>> _executionQueue =
             new ConcurrentDictionary<string, Channel<Task>>();
+        private readonly IQueueService _queueStrategyService;
 
-        public IEnumerable<string> Queues { get; }
-
-        public QueueBefferService(IOptions<QueueOptions> options)
+        public QueueBefferService(IQueueService queueStrategyService)
         {
-            Queues = options.Value.Queues.Select(x => x.Name);
+            _queueStrategyService = queueStrategyService;
 
-            foreach (var queue in Queues)
+            foreach (var queue in _queueStrategyService.Queues)
             {
                 var channelOptions = new BoundedChannelOptions(int.MaxValue)
                 {
@@ -31,7 +30,7 @@ namespace SharpBatch.Core.Services
 
                 var channelQueue = Channel.CreateBounded<Task>(channelOptions);
 
-                _executionQueue.TryAdd(queue, channelQueue);
+                _executionQueue.TryAdd(queue.Name, channelQueue);
             }
         }
 
@@ -55,12 +54,17 @@ namespace SharpBatch.Core.Services
             return task;
         }
 
-        public async ValueTask<Task> DequeueAsync(
-            string queueName)
+        public async ValueTask<KeyValuePair<string, Task>> DequeueAsync()
         {
+            var queueName = _queueStrategyService.GetByStrategy();
             var workItem = await _executionQueue[queueName].Reader.ReadAsync();
 
-            return workItem;
+            return new KeyValuePair<string, Task>(queueName, workItem);
+        }
+
+        public void Free(string key)
+        {
+            _queueStrategyService.Free(key);
         }
 
         public void Dispose()

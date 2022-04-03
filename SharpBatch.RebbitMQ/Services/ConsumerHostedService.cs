@@ -60,6 +60,8 @@ namespace SharpBatch.RebbitMQ.Consumer.Services
             {
                 try
                 {
+                    channel.BasicAck(message.DeliveryTag, true);
+
                     var taskawait = await _queueBefferService.QueueAsync(name, x =>
                     {
                         var scope = _serviceProvider.CreateScope();
@@ -74,8 +76,6 @@ namespace SharpBatch.RebbitMQ.Consumer.Services
                     {
                         ThrowQueueServiceConsumeException(taskawait.Exception);
                     }
-
-                    channel.BasicAck(message.DeliveryTag, false);
 
                 }
                 catch (Exception e)

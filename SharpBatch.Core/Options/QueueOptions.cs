@@ -13,5 +13,6 @@ namespace SharpBatch.Core.Options
     public class Queue
     {
         public string Name { get; set; }
+        public int MaxParallel { get; set; }
     }
 }
