@@ -8,6 +8,8 @@ namespace SharpBatch.Core.Interfaces
 {
     public interface IQueueBefferService : IDisposable
     {
+        IEnumerable<Queue> Queues { get; }
+
         Task<Task> QueueAsync(string queueName, Action<CancellationToken> action);
 
         ValueTask<KeyValuePair<string, Task>> DequeueAsync();

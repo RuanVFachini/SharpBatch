@@ -48,8 +48,8 @@ namespace SharpBatch.RebbitMQ.Consumer.Services
 
             foreach (var queue in _queueBefferService.Queues)
             {
-                var consumer = GenerateGenericAsyncConsumer(channel, queue);
-                channel.BasicConsume(queue, false, consumer);
+                var consumer = GenerateGenericAsyncConsumer(channel, queue.Name);
+                channel.BasicConsume(queue.Name, false, consumer);
             }
         }
 

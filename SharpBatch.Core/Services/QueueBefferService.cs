@@ -17,6 +17,8 @@ namespace SharpBatch.Core.Services
             new ConcurrentDictionary<string, Channel<Task>>();
         private readonly IQueueService _queueStrategyService;
 
+        public IEnumerable<Queue> Queues => _queueStrategyService.Queues;
+
         public QueueBefferService(IQueueService queueStrategyService)
         {
             _queueStrategyService = queueStrategyService;
