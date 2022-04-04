@@ -6,7 +6,6 @@ namespace SharpBatch.Core.Options
     {
         public const string Section = "SharpBatch:BackgroundService";
 
-        public int Workers { get; set; }
         public int ServerWorkerRefresh { get; set; }
     }
 }

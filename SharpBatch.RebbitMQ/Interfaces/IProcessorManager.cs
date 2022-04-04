@@ -8,6 +8,6 @@ namespace SharpBatch.RebbitMQ.Consumer.Interfaces
 {
     public interface IProcessorManager
     {
-        void Execute(BasicDeliverEventArgs message);
+        Task ExecuteAsync(BasicDeliverEventArgs message);
     }
 }

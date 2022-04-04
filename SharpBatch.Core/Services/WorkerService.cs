@@ -9,48 +9,37 @@ namespace SharpBatch.Core.Workers
 {
     public class WorkerService : IWorkerService
     {
-        private readonly IQueueBefferService _queueBefferService;
         private readonly ILogger<IWorkerService> _logger;
+        private readonly IQueueService _queueService;
 
         public WorkerService(
-            IQueueBefferService service,
-            ILogger<IWorkerService> logger)
+            ILogger<IWorkerService> logger,
+            IQueueService queueService)
         {
-            _queueBefferService = service;
             _logger = logger;
+            _queueService = queueService;
         }
-        public Thread CreateWorker(CancellationToken stoppingToken)
+        public virtual Thread CreateWorker(CancellationToken stoppingToken)
         {
             return 
                 new Thread(() =>
                 {
-                    Task.Run(async () =>
+                    try
                     {
-                        while (!stoppingToken.IsCancellationRequested)
+                        var workItem = _queueService.DequeueTask();
+
+                        if (workItem != null)
                         {
-                            try
-                            {
-                                var workItem = await _queueBefferService.DequeueAsync();
+                            workItem.Start();
 
-                                try
-                                {
-                                    workItem.Value.Start();
-                                    workItem.Value.Wait(stoppingToken);
-
-                                    _queueBefferService.Free(workItem.Key);
-                                }
-                                catch (Exception ex)
-                                {
-                                    _logger.LogError(ex,
-                                        "Error occurred executing Background Server.");
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                throw e;
-                            }
+                            workItem.Wait(stoppingToken);
                         }
-                    }).Wait();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex,
+                            "Error occurred executing Background Server.");
+                    }
                 })
                 {
                     IsBackground = true
@@ -59,7 +48,7 @@ namespace SharpBatch.Core.Workers
 
         public void Dispose()
         {
-            _queueBefferService.Dispose();
+            _queueService.Dispose();
         }
     }
 }

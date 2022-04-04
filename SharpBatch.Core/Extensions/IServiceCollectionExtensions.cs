@@ -18,7 +18,6 @@ namespace SharpBatch.Core.Extensions
             services.Configure<BackgroundOptions>(x =>
             {
                 x.ServerWorkerRefresh = backgroundOption.ServerWorkerRefresh;
-                x.Workers = backgroundOption.Workers;
             });
 
             var queueOption = config.GetSection(QueueOptions.Section).Get<QueueOptions>();
@@ -28,7 +27,7 @@ namespace SharpBatch.Core.Extensions
                 x.Queues = queueOption.Queues;
             });
 
-            services.AddSingleton<IQueueBefferService, QueueBefferService>();
+            services.AddSingleton<IQueueService, QueueService>();
             services.AddSingleton<IWorkerService, WorkerService>();
 
             services.AddHostedService<QueuedHostedService>();

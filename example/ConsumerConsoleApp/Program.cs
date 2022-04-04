@@ -27,9 +27,9 @@ namespace ConsumerConsoleApp
 
     public class ProcessorManager : IProcessorManager
     {
-        public void Execute(BasicDeliverEventArgs message)
+        public Task ExecuteAsync(BasicDeliverEventArgs message)
         {
-            Console.Write(message.Body);
+            throw new NotImplementedException();
         }
     }
 }

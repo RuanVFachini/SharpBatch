@@ -14,17 +14,20 @@ namespace SharpBatch.Core.Services
     public class QueuedHostedService : BackgroundService, IDisposable
     {
         private readonly ILogger<QueuedHostedService> _logger;
-        private readonly BackgroundOptions _backgroundOptions;
         private readonly IWorkerService _workerService;
+        private readonly BackgroundOptions _backgroundOptions;
+        private readonly QueueOptions _queueOptions;
         private readonly List<Thread> ThreadList = new List<Thread>();
 
         public QueuedHostedService(
             ILogger<QueuedHostedService> logger,
             IOptions<BackgroundOptions> options,
+            IOptions<QueueOptions> queueOptions,
             IWorkerService workerService)
         {
             _logger = logger;
             _backgroundOptions = options.Value;
+            _queueOptions = queueOptions.Value;
             _workerService = workerService;
         }
 
@@ -46,7 +49,7 @@ namespace SharpBatch.Core.Services
                         {
                             var thread = _workerService.CreateWorker(stoppingToken);
 
-                            ThreadList.Add(thread) ;
+                            ThreadList.Add(thread);
 
                             thread.Start();
                         }
@@ -67,7 +70,7 @@ namespace SharpBatch.Core.Services
         {
             ThreadList.RemoveAll(x => !x.IsAlive);
 
-            return _backgroundOptions.Workers - ThreadList.Count > 0;
+            return _queueOptions.Queues.Sum(x => x.MaxParallel) - ThreadList.Count > 0;
         }
 
         public override async Task StopAsync(CancellationToken stoppingToken)
